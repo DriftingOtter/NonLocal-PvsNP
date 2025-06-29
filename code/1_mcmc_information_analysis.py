@@ -16,7 +16,7 @@ from itertools import product
 # Corresponds to the parameters described in Section 4.1
 COLORS = [0, 1, 2]
 BETA = 5.0          # Inverse temperature for MCMC sampling
-NUM_SAMPLES = 20000 # Number of samples to generate
+NUM_SAMPLES = 30000 # Number of samples to generate
 
 def get_benchmark_graph(name):
     """

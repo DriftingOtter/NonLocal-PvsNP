@@ -29,14 +29,23 @@ def get_benchmark_graph(name, label):
     """ Returns a networkx graph and its ground-truth 3-colorability label. """
     G = nx.Graph()
     # 3-Colorable Graphs (Label = 1)
-    if name == "prism": G.add_edges_from([(0,1),(1,2),(2,0),(3,4),(4,5),(5,3),(0,3),(1,4),(2,5)])
-    elif name == "petersen": G = nx.petersen_graph()
-    elif name == "Cycle C5": G = nx.cycle_graph(5)
+    if name == "prism": 
+        G.add_nodes_from(range(6))
+        G.add_edges_from([(0,1),(1,2),(2,0),(3,4),(4,5),(5,3),(0,3),(1,4),(2,5)])
+    elif name == "petersen": 
+        G = nx.petersen_graph()
+    elif name == "Cycle C5": 
+        G = nx.cycle_graph(5)
     # Not 3-Colorable Graphs (Label = 0)
-    elif name == "chvatal": G = nx.chvatal_graph()
-    elif name == "groetzsch": G.add_nodes_from(range(11)); G.add_edges_from([(0,1),(0,2),(0,3),(0,4),(0,5),(1,6),(1,8),(1,10),(2,6),(2,7),(2,9),(3,7),(3,8),(3,10),(4,6),(4,9),(4,10),(5,7),(5,8),(5,9)])
-    elif name == "k4": G = nx.complete_graph(4)
-    else: raise ValueError(f"Invalid graph name: {name}")
+    elif name == "chvatal": 
+        G = nx.chvatal_graph()
+    elif name == "groetzsch": 
+        G.add_nodes_from(range(11))
+        G.add_edges_from([(0,1),(0,2),(0,3),(0,4),(0,5),(1,6),(1,8),(1,10),(2,6),(2,7),(2,9),(3,7),(3,8),(3,10),(4,6),(4,9),(4,10),(5,7),(5,8),(5,9)])
+    elif name == "k4": 
+        G = nx.complete_graph(4)
+    else: 
+        raise ValueError(f"Invalid graph name: {name}")
     return G, label
 
 def networkx_to_pyg_data(G, y):
@@ -46,12 +55,24 @@ def networkx_to_pyg_data(G, y):
     of the type discussed in Section 2.2. The GNN's task is to learn a better
     representation from this basic information.
     """
+    # Ensure nodes are numbered consecutively from 0
+    G = nx.convert_node_labels_to_integers(G)
+    
     # Simple local features
     degrees = np.array([G.degree(n) for n in G.nodes()]).reshape(-1, 1)
     clustering = np.array([nx.clustering(G, n) for n in G.nodes()]).reshape(-1, 1)
     node_features = np.hstack([degrees, clustering])
     
-    edge_index = torch.tensor(list(G.edges()), dtype=torch.long).t().contiguous()
+    # Convert edges to tensor - need to handle both directions for undirected graph
+    edges = list(G.edges())
+    if len(edges) > 0:
+        # Add reverse edges for undirected graph
+        edges_bidirectional = edges + [(v, u) for u, v in edges]
+        edge_index = torch.tensor(edges_bidirectional, dtype=torch.long).t().contiguous()
+    else:
+        # Handle graphs with no edges
+        edge_index = torch.empty((2, 0), dtype=torch.long)
+    
     x = torch.tensor(node_features, dtype=torch.float)
     label = torch.tensor([y], dtype=torch.long)
     
@@ -94,12 +115,26 @@ def run_gnn_benchmark():
     print("Justification for a learning-based approach (Conclusion, Section 5)\n")
     
     benchmark_graphs = [
-        ("Cycle C5", 1), ("Prism", 1), ("Petersen Graph", 1),
-        ("K4", 0), ("Grötzsch", 0), ("Chvátal", 0)
+        ("Cycle C5", 1), ("prism", 1), ("petersen", 1),
+        ("k4", 0), ("groetzsch", 0), ("chvatal", 0)
     ]
     
-    dataset = [networkx_to_pyg_data(*get_benchmark_graph(name, label)) for name, label in benchmark_graphs]
-    train_loader = DataLoader(dataset, batch_size=2, shuffle=True)
+    # Create dataset with proper error handling
+    dataset = []
+    for name, label in benchmark_graphs:
+        try:
+            G, y = get_benchmark_graph(name, label)
+            data = networkx_to_pyg_data(G, y)
+            dataset.append(data)
+        except Exception as e:
+            print(f"Error processing graph {name}: {e}")
+            continue
+    
+    if len(dataset) == 0:
+        print("No valid graphs in dataset!")
+        return
+        
+    train_loader = DataLoader(dataset, batch_size=min(2, len(dataset)), shuffle=True)
     test_loader = DataLoader(dataset, batch_size=1, shuffle=False)
 
     model = GCN(num_node_features=2, hidden_channels=16)
@@ -109,12 +144,18 @@ def run_gnn_benchmark():
     print("Training GNN to learn non-local features...")
     for epoch in range(100):
         model.train()
+        total_loss = 0
         for data in train_loader:
             optimizer.zero_grad()
             out = model(data.x, data.edge_index, data.batch)
             loss = criterion(out, data.y)
             loss.backward()
             optimizer.step()
+            total_loss += loss.item()
+        
+        if epoch % 20 == 0:
+            print(f"Epoch {epoch}, Loss: {total_loss/len(train_loader):.4f}")
+    
     print("Training complete.\n")
 
     print("--- GNN Performance on Benchmark Graphs ---")
@@ -122,7 +163,13 @@ def run_gnn_benchmark():
     print("-" * 80)
     
     model.eval()
+    correct = 0
+    total = 0
+    
     for i, data in enumerate(test_loader):
+        if i >= len(benchmark_graphs):
+            break
+            
         graph_name = benchmark_graphs[i][0]
         true_label = "3-Colorable" if data.y.item() == 1 else "Not 3-Colorable"
         
@@ -132,8 +179,18 @@ def run_gnn_benchmark():
         
         pred_label = "3-Colorable" if pred == 1 else "Not 3-Colorable"
         status = "✔ Correct" if pred == data.y.item() else "✘ Incorrect"
+        
+        if pred == data.y.item():
+            correct += 1
+        total += 1
+        
         print(f"{graph_name:<20} | {true_label:<15} | {pred_label:<20} | {status}")
+    
     print("-" * 80)
+    accuracy = correct / total if total > 0 else 0
+    print(f"Overall Accuracy: {accuracy:.2%} ({correct}/{total})")
+    print("\nNote: This is a demonstration of GNN capability on a small dataset.")
+    print("For real applications, much larger and more diverse training sets would be needed.")
 
 
 if __name__ == "__main__":

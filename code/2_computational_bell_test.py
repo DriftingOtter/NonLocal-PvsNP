@@ -55,7 +55,13 @@ def find_all_3_colorings(G, initial_constraints={}):
                 coloring[vertex] = color
                 solve(vertex_idx + 1)
                 del coloring[vertex] # Backtrack
-    solve(0)
+    
+    # Handle the case where there are no nodes to color
+    if len(nodes_to_color) == 0:
+        solutions.append(coloring.copy())
+    else:
+        solve(0)
+    
     return solutions
 
 def compute_joint_probabilities(G, u, v, u_n, v_n, setting_u, setting_v):
@@ -76,7 +82,9 @@ def compute_joint_probabilities(G, u, v, u_n, v_n, setting_u, setting_v):
     for sol in all_solutions:
         outcome_u = sol.get(u_n)
         outcome_v = sol.get(v_n)
-        counts[(outcome_u, outcome_v)] += 1
+        # Only count if both outcomes are defined
+        if outcome_u is not None and outcome_v is not None:
+            counts[(outcome_u, outcome_v)] += 1
             
     prob_matrix = np.zeros((3, 3))
     for (i, j), count in counts.items():
@@ -113,8 +121,19 @@ def run_bell_test(graph_name):
     u, v = max(((n1, n2) for n1 in all_paths for n2 in all_paths[n1]), key=lambda x: all_paths[x[0]][x[1]])
 
     # 2. Choose measurement devices -> two neighbors u_n, v_n.
-    u_n = list(G.neighbors(u))[0]
-    v_n = list(G.neighbors(v))[0]
+    u_neighbors = list(G.neighbors(u))
+    v_neighbors = list(G.neighbors(v))
+    
+    # Check if nodes have neighbors
+    if not u_neighbors:
+        print(f"Error: Node u={u} has no neighbors")
+        return
+    if not v_neighbors:
+        print(f"Error: Node v={v} has no neighbors")
+        return
+        
+    u_n = u_neighbors[0]
+    v_n = v_neighbors[0]
 
     # 3. Choose measurement settings -> colors {0, 1} for u and v.
     # We test four combinations of settings (a,b), (a,b'), (a',b), (a',b').
@@ -145,7 +164,7 @@ def run_bell_test(graph_name):
     else:
         print("Verdict: ✘ Bell's Inequality Respected.")
     
-    print(f"Conclusion: {the paper's 'profound null result'} is reproduced.")
+    print("Conclusion: The paper's 'profound null result' is reproduced.")
 
 if __name__ == "__main__":
     # Run the test on a simple graph where it is computationally tractable.
