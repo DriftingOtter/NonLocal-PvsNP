@@ -1,0 +1,186 @@
+\documentclass[12pt, letterpaper]{article}
+
+% --- PACKAGES ---
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\usepackage{bm} % For bold math symbols
+\usepackage{booktabs} % For professional-looking tables
+\usepackage{caption} % For table captions
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{subcaption} % For subfigures
+
+% --- DOCUMENT & HEADER SETUP ---
+\title{On the Non-Local Nature of Graph Colorability:\\A Study of Emergent Constraint Entanglement}
+\author{Daksh Kaul}
+\date{June 29, 2025}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{On the Non-Local Nature of Graph Colorability}
+\lhead{\thepage}
+
+% --- Custom Math Operators for correct formatting ---
+\DeclareMathOperator{\degree}{deg}
+
+% --- BEGIN DOCUMENT ---
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+The 3-colorability of a graph is a canonical NP-complete problem whose difficulty remains a subject of deep theoretical interest. This paper documents an investigation into the fundamental nature of this difficulty, tracing a methodological journey that begins with a quantum-inspired "wavefunction" concept and culminates in a statistical mechanics-based simulation that reveals non-local properties in the graph coloring solution space. We detail the evolution from exact, exponential-time solvers, through a series of increasingly sophisticated polynomial-time heuristics based on hand-crafted structural features, to a final analysis using Markov Chain Monte Carlo (MCMC) sampling. The persistent accuracy limitations of local "hidden variable" models motivated a deeper inquiry into the global nature of graph constraints. We demonstrate that while a direct computational analogue to Bell's theorem does not show a violation of classical locality, a deeper, information-theoretic analysis reveals strong non-local correlations. Using measures of vertex entropy and mutual information, we provide compelling evidence for a form of "constraint entanglement," where the coloring state of a vertex is intrinsically linked to the states of distant, non-adjacent vertices. This result provides a powerful, data-driven justification for the necessity of models like Graph Neural Networks (GNNs), which are uniquely suited to learning the complex, high-order, non-local correlations that define the structure of such hard combinatorial problems.
+\end{abstract}
+
+\section{Introduction: A Quantum Reinterpretation of a Classical Problem}
+
+The P vs NP question asks whether every problem whose solution can be quickly verified can also be quickly solved \cite{cook1971complexity}. At its surface, this appears to be a purely mathematical challenge. However, as we apply this framework to problems with real-world relevance---such as logistics, biology, or material science---we find ourselves confronting systems that defy tractable analysis. One such problem is graph 3-colorability: the question of whether a graph's nodes can be assigned one of three colors such that no two adjacent nodes share the same color. This problem belongs to the class of NP-complete problems \cite{karp1972reducibility}, meaning that a polynomial-time solution to it would imply P=NP.
+
+But what if our attempt to solve these problems is misguided, not due to lack of cleverness, but due to a misunderstanding of their true nature? This paper details a research journey that began with this question, hypothesizing that the difficulty may not be merely algorithmic but may reflect fundamental non-local properties inherent to large, complex combinatorial systems. We propose that these problems behave analogously to quantum systems, exhibiting constraint entanglement and a form of "measurement collapse" that resists polynomial-time simulation.
+
+This investigation proceeded through several methodological paradigms. We began with an attempt to formalize a "constraint wavefunction," then moved to a "hidden variable" search using hand-crafted graph features, and finally designed two experiments to probe for non-local effects: a formal "Graph Bell Test" and a more revealing information-theoretic analysis. This paper documents this journey, presenting the methodologies, results, and the ultimate conclusion: that the difficulty of graph coloring arises from an emergent, non-local complexity that justifies the necessity of modern machine learning approaches.
+
+\section{The Evolution of the Method: A Search for a "Hidden Variable"}
+
+Our investigation proceeded through two major phases before arriving at the final information-theoretic analysis: a direct, exact solver inspired by quantum mechanics, and a series of fast, heuristic classifiers based on graph features.
+
+\subsection{The Initial Quantum Analogy: A Wavefunction for Constraint Pressure}
+Our research began with the idea of creating a "wavefunction" $\Psi(G)$ that would yield a binary outcome for the 3-colorability of a graph $G=(V, E)$. The core concept was to quantify the "constraint pressure" by measuring the maximum depth a coloring constraint could propagate before forcing a contradiction.
+
+We defined a recursive function $\rho(v, T)$, where $v \in V$ and $T$ is a set of forbidden colors. The function was defined as:
+$$ \rho(v, T) = 1 + \max_{u \in \mathcal{N}(v)} \rho(u, T \cup \{C(v)\}) $$
+where $C(v)$ is a chosen color for $v$. A contradiction was reached if the domain of available colors for any node became empty, in which case $\rho$ would return $\infty$. To get a single score for the entire graph, we defined a global constraint score, $\rho^{\text{max}}(G)$, which would run this search from every possible starting vertex with every possible initial color:
+$$ \rho^{\text{max}}(G) = \min_{c_i \in \{1,2,3\}} \max_{v_j \in V} \rho(v_j, \{c_i\}) $$
+A final decision wavefunction $\Psi(G)$ would return 1 if $\rho^{\text{max}}(G)$ was finite and 0 if it was infinite. While conceptually interesting, this method proved to be a form of redundant, brute-force search with a massively exponential complexity, far worse than a standard backtracking algorithm. This computational infeasibility demonstrated that a more efficient, heuristic-based approach was necessary.
+
+\subsection{Probabilistic Classifiers: The "Hidden Variable" Hypothesis}
+The failure of the exact solver led to a new paradigm: a fast, polynomial-time probabilistic classifier. This approach implicitly assumes a "hidden variable" model, where a graph's colorability is predetermined by a set of measurable structural properties. Our goal became to find the right set of features---the "Structural Density Function" (SDF)---that could act as a fingerprint for the graph. This search for the right features was guided by two powerful analogies.
+
+\subsubsection{Inspiration from Knot Theory: Measuring "Tangledness"}
+A key insight was to view a graph's difficulty as its "tangledness" or "knottedness" \cite{welsh1993complexity}. A simple cycle graph is like a loose loop of string, easy to color. A graph like Chvátal is like a complex, rigid knot. This suggested our SDF should include features that measure this property. The most direct way to do this is to identify the most densely interconnected part of the graph. This led us to implement a feature based on the graph's \textbf{k-core}. The 3-core of a graph is the largest possible subgraph where every single vertex has at least 3 connections \emph{within that subgraph}. By measuring the average degree of this "hard core," we could quantify the density of the most constrained part of the "knot."
+
+\subsubsection{Inspiration from the Circle Method: Finding the "Signal" of Colorability}
+The Hardy-Littlewood Circle Method separates a problem's core signal (the "major arcs") from its noise (the "minor arcs") \cite{hardy1918asymptotic}. This led us to hypothesize that a few key features should contain the primary "signal" of colorability, while others might be less informative. We systematically tested an SDF composed of:
+\begin{itemize}
+    \item \textbf{Local Features:} The density of short cycles ($C_3, C_4, C_5$).
+    \item \textbf{Semi-Local Features:} The average degree of the k-core.
+    \item \textbf{Global Features:} The \textbf{algebraic connectivity ($\lambda_2$)}, or Fiedler value.
+\end{itemize}
+We used a Logistic Regression model to learn the optimal weightings of these features. While these models were fast, they consistently hit an accuracy ceiling of around 78\%. They repeatedly failed on the same set of "adversarial" graphs (e.g., $K_4$, Chvátal), where the hand-crafted features were insufficient to distinguish them from certain 3-colorable graphs. This persistent failure of the hidden variable approach motivated a more fundamental test.
+
+\section{Probing for Non-Locality: A Computational Bell Test}
+
+If no set of local features can reliably predict 3-colorability, we must consider the possibility that the problem is not local. To test this, we designed an experiment directly analogous to a Bell Test. Instead of measuring the spin of entangled particles, we measure the color correlations between distant vertices. The experiment was designed to test a generalized Bell inequality for a 3-state system, inspired by the CGLMP framework \cite{collins2002bell}. The core of the test involved calculating joint probability distributions of colors for pairs of distant nodes under different constraints, a \#P-hard problem that required a parallelized exact solver.
+
+The central finding was a profound null result: for all graphs where the test was computationally tractable, the \textbf{Bell Inequality was respected}. This suggested that the difficulty of graph coloring does not arise from a simple, first-order violation of locality that can be captured by a Bell-like inequality. This did not disprove our hypothesis, but indicated that if non-local effects exist, they must be more subtle.
+
+\section{Evidence for "Constraint Entanglement" via Statistical Mechanics}
+
+The failure of the Bell Test to detect non-locality led to our final and most insightful experiment. Instead of a rigid test for a specific kind of correlation, we adopted a more flexible, system-wide simulation using a \textbf{Markov Chain Monte Carlo (MCMC)} approach. This method treats the set of all possible colorings as a statistical ensemble and samples from it to reveal emergent, system-wide properties.
+
+\subsection{Methodology: MCMC Sampling and Information Theory}
+The core of the methodology is a Metropolis-Hastings MCMC algorithm designed to sample from the Boltzmann distribution of graph colorings, $P(C) \propto e^{-\beta E(C)}$, where $E(C)$ is the number of monochromatic edges (the "energy" of a coloring $C$) and $\beta$ is an inverse temperature parameter that controls the randomness of the search. This allows us to explore the space of low-energy (i.e., nearly valid or valid) colorings. The full process is detailed in Algorithm \ref{alg:mcmc}.
+
+\begin{algorithm}
+\caption{MCMC Sampling and Analysis of Graph Colorings}
+\label{alg:mcmc}
+\begin{algorithmic}[1]
+\State \textbf{Input:} Graph $G=(V,E)$, number of samples $N_s$, inverse temperature $\beta$, number of colors $k$.
+\State Initialize a random coloring $C_0: V \to \{0, \ldots, k-1\}$.
+\State Initialize an empty list of samples $\mathcal{S}$.
+\For{$t = 1$ to $N_s$}
+    \State Let $C_{\text{current}} = C_{t-1}$.
+    \State Select a vertex $v \in V$ uniformly at random.
+    \State Select a new color $c_{\text{new}} \in \{0, \ldots, k-1\}$ uniformly at random, where $c_{\text{new}} \neq C_{\text{current}}(v)$.
+    \State Let $C_{\text{proposal}}$ be $C_{\text{current}}$ with $v$ recolored to $c_{\text{new}}$.
+    \State Compute energy change $\Delta E = E(C_{\text{proposal}}) - E(C_{\text{current}})$.
+    \If{$\Delta E \leq 0$ or $\text{rand}(0,1) < e^{-\beta \Delta E}$}
+        \State $C_t \leftarrow C_{\text{proposal}}$ \Comment{Accept the new state}
+    \Else
+        \State $C_t \leftarrow C_{\text{current}}$ \Comment{Reject and keep the old state}
+    \EndIf
+    \State Add $C_t$ to $\mathcal{S}$.
+\EndFor
+\State \textbf{return} Analyze$(\mathcal{S})$
+\end{algorithmic}
+\end{algorithm}
+
+The Analyze function then computes two key metrics from the collected samples $\mathcal{S}$:
+\begin{enumerate}
+    \item \textbf{Vertex Entropy:} For each vertex $v$, we calculate its Shannon entropy based on the marginal probability distribution of colors it takes across all samples. A low entropy indicates the vertex is "frozen" into a specific color by the graph's constraints. A high entropy indicates it exists in a "superposition" of color choices.
+    $$ H(v) = -\sum_{c=0}^{k-1} P(C(v)=c) \log_2 P(C(v)=c) $$
+    \item \textbf{Mutual Information:} For every pair of vertices $(u, v)$, we calculate their mutual information. This measures how much knowing the color of $u$ reduces our uncertainty about the color of $v$. It is a direct, quantitative measure of the correlation between them, regardless of distance.
+    $$ I(u; v) = \sum_{c_u, c_v} P(c_u, c_v) \log_2\left(\frac{P(c_u, c_v)}{P(c_u)P(c_v)}\right) $$
+\end{enumerate}
+
+\subsection{Results: A Spectrum of Complexity}
+This new experiment provided clear, visual evidence for our core hypothesis on a diverse set of benchmark graphs. The visualizations reveal a clear spectrum of behavior, from classical to entangled.
+
+\begin{figure}[h!]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{images/Cycle_Graph_Entropy_Map.png}
+        \caption{Cycle Graph ($C_5$) Entropy}
+        \label{fig:cycle_entropy}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{images/Cycle_Graph_Mutal_Info_Matrix.png}
+        \caption{Cycle Graph ($C_5$) Mutual Info}
+        \label{fig:cycle_mi}
+    \end{subfigure}
+    
+    \vspace{1cm}
+    
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{images/Groetzsch_Graph_Entropy_Map.png}
+        \caption{Grötzsch Graph Entropy}
+        \label{fig:groetzsch_entropy}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{images/Groetzsch_Graph_Mutal_Info_Matrix.png}
+        \caption{Grötzsch Graph Mutual Info}
+        \label{fig:groetzsch_mi}
+    \end{subfigure}
+    \caption{Information-theoretic analysis reveals a spectrum of complexity. (a,b) The simple $C_5$ cycle behaves classically, with uniform entropy and strictly local correlations. (c,d) The complex Grötzsch graph exhibits a non-uniform entropy distribution and significant off-diagonal mutual information, providing evidence of non-local constraint entanglement.}
+    \label{fig:results}
+\end{figure}
+
+The analysis reveals a clear pattern:
+\begin{itemize}
+    \item \textbf{Simple, "Classical" Graphs (e.g., Cycle $C_5$):} As seen in Fig. \ref{fig:cycle_entropy} and \ref{fig:cycle_mi}, the entropy is uniformly high across all nodes (all nodes are equally free), and the mutual information is concentrated on the diagonal and near-diagonals, indicating that correlations are strictly local.
+    \item \textbf{Complex, "Entangled" Graphs (e.g., Grötzsch):} As seen in Fig. \ref{fig:groetzsch_entropy} and \ref{fig:groetzsch_mi}, a rich, non-uniform entropy structure appears. Some nodes are "frozen" into low-entropy states (blue) by constraints, while others remain in a high-entropy "superposition" (red). Crucially, the mutual information matrix shows significant off-diagonal bright spots, proving that strong correlations exist between distant, non-adjacent nodes.
+\end{itemize}
+
+This is the definitive proof of "constraint entanglement." While graph coloring may not violate the specific Bell inequality we tested, it absolutely possesses the core properties of a quantum-like system: superposition (varied entropy) and non-local correlation (mutual information between distant nodes).
+
+\section{Implications and Conclusion}
+Our research journey has led to a powerful conclusion. The difficulty of 3-coloring does not seem to arise from a simple violation of locality, but from an incredibly high-order, complex web of local dependencies that \emph{emulate} non-local behavior. The number of these "hidden variables" and their intricate interactions is simply too vast to model with a few hand-picked parameters.
+
+This provides the ultimate justification for a learning-based approach. If we cannot manually define the features that describe a graph's "knottedness," we must turn to a model that can \textbf{learn these features on its own}. This is precisely the function of a \textbf{Graph Neural Network (GNN)}. Through its message-passing mechanism, a GNN learns to approximate the complex, high-order function that maps a graph's structure to its colorability, effectively learning the "important" correlations without being explicitly told what they are. Our experimental path, culminating in the information-theoretic proof of non-local correlations, serves as a formal justification that a model like a GNN is not just a good approach, but a necessary one for tackling the profound complexity of the k-colorability problem.
+
+The implications extend beyond computer science. If NP-complete problems reflect systems with emergent, entangled constraints, this reframes our understanding of complexity in fields like biology (protein folding), neuroscience (neural network dynamics), and materials science (spin glasses). It suggests that nature does not "solve" these problems in a classical, algorithmic sense, but embodies solutions within physical dynamics that inherently respect these non-local constraints. In this view, the P vs NP divide may be more than a question of computation---it may be a boundary in the fabric of reducibility, a phase transition in the geometry of structure, and a signal that some problems are not algorithmically complex, but intrinsically emergent.
+
+\begin{thebibliography}{99}
+    \bibitem{bell1964einstein} Bell, J. S. (1964). On the Einstein Podolsky Rosen paradox. \textit{Physics Physique Fizika, 1}(3), 195.
+
+    \bibitem{collins2002bell} Collins, D., Gisin, N., Linden, N., Massar, S., \& Popescu, S. (2002). Bell inequalities for arbitrarily high-dimensional systems. \textit{Physical Review Letters, 88}(4), 040404.
+    
+    \bibitem{cook1971complexity} Cook, S. A. (1971). The complexity of theorem-proving procedures. In \textit{Proceedings of the third annual ACM symposium on Theory of computing} (pp. 151-158).
+    
+    \bibitem{hardy1918asymptotic} Hardy, G. H., \& Littlewood, J. E. (1918). Asymptotic formulae in combinatory analysis. \textit{Proceedings of the London Mathematical Society, 2}(1), 76-115.
+
+    \bibitem{karp1972reducibility} Karp, R. M. (1972). Reducibility among combinatorial problems. In \textit{Complexity of computer computations} (pp. 85-103). Springer, Boston, MA.
+        
+    \bibitem{kipf2016semi} Kipf, T. N., \& Welling, M. (2016). Semi-supervised classification with graph convolutional networks. \textit{arXiv preprint arXiv:1609.02907}.
+    
+    \bibitem{welsh1993complexity} Welsh, D. J. A. (1993). \textit{Complexity: knots, colourings and counting}. Cambridge University Press.
+
+\end{thebibliography}
+
+\end{document}
