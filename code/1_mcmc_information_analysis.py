@@ -25,6 +25,8 @@ def get_benchmark_graph(name):
     if name.lower() == "cycle c5":
         # A simple, "classical" graph as per Section 4.2
         return nx.cycle_graph(5)
+    elif name.lower() == "complete graph":
+        return nx.complete_graph(4)
     elif name.lower() == "groetzsch":
         # A complex, "entangled" graph as per Section 4.2
         G = nx.Graph()
@@ -33,6 +35,8 @@ def get_benchmark_graph(name):
                           (2,6), (2,7), (2,9), (3,7), (3,8), (3,10), (4,6), (4,9), 
                           (4,10), (5,7), (5,8), (5,9)])
         return G
+    elif name.lower() == "mycielski":
+        return nx.mycielski_graph(5)
     else:
         raise ValueError(f"Unknown graph name: {name}")
 
@@ -202,9 +206,9 @@ if __name__ == "__main__":
     mi_matrix_c5, mi_nodes_c5 = compute_mutual_information(samples_c5, G_c5)
     visualize_results(G_c5, "Cycle C₅ (Classical)", entropies_c5, mi_matrix_c5, mi_nodes_c5)
 
-    # 2. The "Entangled" Graph: Grötzsch
-    G_groetzsch = get_benchmark_graph("Groetzsch")
-    samples_groetzsch = mcmc_sampler(G_groetzsch, num_samples=NUM_SAMPLES, beta=BETA)
-    entropies_groetzsch = compute_vertex_entropy(samples_groetzsch, G_groetzsch)
-    mi_matrix_groetzsch, mi_nodes_groetzsch = compute_mutual_information(samples_groetzsch, G_groetzsch)
-    visualize_results(G_groetzsch, "Grötzsch Graph (Entangled)", entropies_groetzsch, mi_matrix_groetzsch, mi_nodes_groetzsch)
+    # 2. The "Entangled" Graph: Mycielski
+    G_mycielski = get_benchmark_graph("Mycielski")
+    samples_mycielski = mcmc_sampler(G_mycielski, num_samples=NUM_SAMPLES, beta=BETA)
+    entropies_mycielski = compute_vertex_entropy(samples_mycielski, G_mycielski)
+    mi_matrix_mycielski, mi_nodes_mycielski = compute_mutual_information(samples_mycielski, G_mycielski)
+    visualize_results(G_mycielski, "Mycielski Graph (Entangled)", entropies_mycielski, mi_matrix_mycielski, mi_nodes_mycielski)
