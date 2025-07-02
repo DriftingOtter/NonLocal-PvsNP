@@ -27,13 +27,7 @@ We term this phenomenon **"constraint entanglement,"** where the coloring state 
 │   └── images/
 ├── code/                     # The core Python scripts for the experiments.
 │   ├── 1_mcmc_information_analysis.py
-│   ├── 2_computational_bell_test.py
-│   └── 3_gnn_classifier.py
-├── mcmc_analysis/            # Key visual results from the information-theoretic analysis.
-│   ├── Cycle_Graph_Entropy_Map.png
-│   ├── Cycle_Graph_Mutal_Info_Matrix.png
-│   ├── Groetzsch_Graph_Entropy_Map.png
-│   └── ...
+│   └── 2_computational_bell_test.py
 ├── requirements.txt          # A list of all required Python packages for installation.
 ├── LICENSE                   # MIT License for the code.
 └── CC_LICENSE.txt            # Creative Commons license for the paper and written content.
@@ -90,17 +84,9 @@ python code/2_computational_bell_test.py
 
 Inside the script, you can change the `GRAPH_TO_TEST` variable to run the experiment on different small graphs.
 
-#### **Experiment 3: The GNN Classifier**
-
-This script demonstrates the logical conclusion of our research: using a Graph Neural Network to classify 3-colorability. It trains a GNN on the benchmark set and reports the final accuracy.
-
-```bash
-python code/3_gnn_classifier.py
-```
-
 ## Key Findings & Visualizations
 
-The core finding of this research is that while the 3-coloring problem may not violate a strict Bell-like inequality, it exhibits profound non-local properties. This can be seen in the outputs of the MCMC analysis located in the `mcmc_analysis/` directory.
+The core finding of this research is that while the 3-coloring problem may not violate a strict Bell-like inequality, it exhibits profound non-local properties. 
 
 * **Entropy Heatmaps:** These show that the "freedom" to choose a color is not uniform across a graph. In complex graphs, some nodes become "frozen" (low entropy, blue) by distant constraints, while others remain in a "superposition" of possibilities (high entropy, red).
 
