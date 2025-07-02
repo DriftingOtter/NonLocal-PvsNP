@@ -96,7 +96,7 @@ These results demonstrate that the difficulty of graph coloring arises from a co
 
 ## The Research Paper
 
-The complete narrative of this investigation, including the initial "wavefunction" concepts, the development of the "hidden variable" models, the analogies to knot theory and the Circle Method, the formal Bell Test, and the final information-theoretic analysis, is detailed in the LaTeX document located at:
+The information-theoretic analysis, is detailed in the LaTeX document located at:
 
 `/paper/main.tex`
 
