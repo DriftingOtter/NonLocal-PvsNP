@@ -7,13 +7,13 @@
 \usepackage{fancyhdr}
 \usepackage{graphicx}
 \usepackage{amsfonts}
-\usepackage{bm} % For bold math symbols
-\usepackage{booktabs} % For professional-looking tables
-\usepackage{caption} % For table captions
+\usepackage{bm}
+\usepackage{booktabs}
+\usepackage{caption}
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
-\usepackage{subcaption} % For subfigures
-\usepackage{csquotes} % For professional-looking 
+\usepackage{subcaption}
+\usepackage{csquotes}
 \usepackage{float}
 
 % --- DOCUMENT & HEADER SETUP ---
@@ -205,6 +205,9 @@ The analysis reveals a clear pattern, allowing us to categorize graphs along a `
 
 \section{Conclusion: The Necessity of a Learning-Based Approach}
 Our research journey has led to a powerful conclusion. The difficulty of 3-coloring does not seem to arise from a simple violation of locality, but from an incredibly high-order, complex web of local dependencies that emulate non-local behavior. The number of these ``hidden variables'' and their intricate interactions is simply too vast to model with a few hand-picked parameters. This observation leads to a critical insight: any approach that seeks to generalize a solution to the k-colorability problem must be capable of capturing—and dynamically adapting to—the diverse, graph-specific patterns of mutual information and vertex entropy observed in our experiments. That is, it must learn to represent and reason about structure-dependent statistical dependencies that span both local neighborhoods and long-range correlations across the graph. Traditional algorithmic methods that rely on fixed rules or heuristics are insufficient for this task, as they lack the flexibility to infer and encode such high-order relational information in a scalable and adaptable manner. Among existing paradigms, Graph Neural Networks (GNNs) stand out as a practical and effective candidate—not because they are the only possible method, but because their architectural principles naturally align with these demands. Through message passing and iterative representation learning, GNNs approximate the complex functions that map graph topologies to their chromatic properties, allowing them to discover latent dependencies without explicit manual encoding. In our case, GNNs have proven capable of learning from the entropy and mutual information signatures that reflect underlying constraint structures—validating their utility in this context. However, this should not be interpreted as a closed prescription. Rather, our findings define a set of necessary capabilities that any viable framework—whether neural, symbolic, probabilistic, or otherwise—must possess in order to scale beyond handcrafted heuristics. These include the ability to model graph-conditional distributions over solution spaces, propagate constraint information across the graph, and adaptively represent the emergent complexity of coloring dynamics. The implications extend beyond computer science. If NP-complete problems reflect systems with emergent, entangled constraints, this reframes our understanding of complexity in fields like biology (protein folding), neuroscience (neural network dynamics), and materials science (spin glasses). It suggests that nature does not ``solve'' these problems in a classical, algorithmic sense, but embodies solutions within physical dynamics that inherently respect these non-local constraints. In this view, the P vs NP divide may be more than a question of computation—it may be a boundary in the fabric of reducibility, a phase transition in the geometry of structure, and a signal that some problems are not algorithmically complex, but intrinsically emergent.
+
+\section*{Acknowledgments}
+We wish to acknowledge the use of AI-powered code generation tools for assisting in the development of certain testing scripts and components of the MCMC algorithm. All AI-generated code was reviewed, verified, and integrated by the authors, who assume full responsibility for its correctness and the reproducibility of the presented results. The code used for this research is publicly available at \href{https://github.com/DriftingOtter/NonLocal-PvsNP}{https://github.com/DriftingOtter/NonLocal-PvsNP}.
 
 \begin{thebibliography}{99}
     \bibitem{bell1964einstein} Bell, J. S. (1964). On the Einstein Podolsky Rosen paradox. \textit{Physics Physique Fizika, 1}(3), 195.
