@@ -7,13 +7,13 @@
 \usepackage{fancyhdr}
 \usepackage{graphicx}
 \usepackage{amsfonts}
-\usepackage{bm}
-\usepackage{booktabs}
-\usepackage{caption}
+\usepackage{bm} % For bold math symbols
+\usepackage{booktabs} % For professional-looking tables
+\usepackage{caption} % For table captions
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
-\usepackage{subcaption}
-\usepackage{csquotes}
+\usepackage{subcaption} % For subfigures
+\usepackage{csquotes} % For professional-looking 
 \usepackage{float}
 
 % --- DOCUMENT & HEADER SETUP ---
@@ -35,9 +35,14 @@
 \maketitle
 
 \begin{abstract}
-The 3-colorability of a graph is a canonical NP-complete problem whose computational hardness remains a topic of deep theoretical interest. This paper presents a methodological investigation that begins with a quantum-inspired “wavefunction” model and culminates in a statistical mechanics–based simulation revealing non-local properties in the graph coloring solution space. The persistent limitations of local, “hidden variable” models prompted a shift toward a global perspective on graph constraints. Through an information-theoretic lens, we uncover strong non-local correlations using measures of vertex entropy and mutual information. These findings provide compelling evidence for a phenomenon we term constraint entanglement, in which the coloring state of a vertex is intrinsically correlated with the states of distant, non-adjacent vertices. To characterize this effect, we categorize graphs along a “non-locality spectrum” using five representative archetypes: classical (Cycle Graph), jammed (Complete Graph), structured (Circulant Graph), community (Wheel Graph), and entangled (Erdős–Rényi Graph). These results offer a data-driven rationale for the use of Graph Neural Networks (GNNs), which are uniquely equipped to learn and model the complex, high-order, non-local correlations that underlie the structure of hard combinatorial problems.
+The 3-colorability of a graph is a canonical NP-complete problem whose computational hardness remains a topic of deep theoretical interest.
+This paper presents a methodological investigation that begins with a quantum-inspired perspective on graph states, leveraging these concepts as powerful analogies for classical phenomena, and culminates in a statistical mechanics–based simulation revealing non-local properties in the graph coloring solution space.
+The persistent limitations of local, "hidden variable" models prompted a shift toward a global perspective on graph constraints.
+Through an information-theoretic lens, we uncover strong non-local correlations using measures of vertex entropy and mutual information.
+These findings provide compelling evidence for a phenomenon we term constraint entanglement, in which the coloring state of a vertex is intrinsically correlated with the states of distant, non-adjacent vertices.
+To characterize this effect, we categorize graphs along a "non-locality spectrum" using five representative archetypes: classical (Cycle Graph), jammed (Complete Graph), structured (Circulant Graph), community (Wheel Graph), and entangled (Erdős–Rényi Graph).
+These results offer a data-driven rationale for the use of Graph Neural Networks (GNNs), which are well-suited to learn and model the complex, high-order, non-local correlations that underlie the structure of hard combinatorial problems, although their inherent limitations for truly global properties must be considered.
 \end{abstract}
-
 
 \section{Introduction: A Quantum Reinterpretation of a Classical Problem}
 
@@ -51,7 +56,7 @@ This approach is fundamentally local in nature. It relies on features that descr
 
 However, this paradigm faces a significant challenge: the existence of ``adversarial'' graphs. These are pairs of graphs that are nearly indistinguishable from the perspective of local features, yet one is 3-colorable while the other is not. For example, a 3-colorable Prism graph and a non-3-colorable complete graph $K_4$ can have identical degrees and k-cores. Any classifier trained on these features is destined to fail on such cases. This persistent failure of local, feature-based models strongly suggests that no simple combination of these ``hidden variables'' can fully capture the property of 3-colorability. The problem's difficulty seems to lie in a property that these features do not measure—a property that is global and topological in nature.
 
-This failure of local models prompted us to look for a new theoretical framework. Analogies to other fields of mathematics and physics suggested that the true ``signal'' of colorability might be a global, topological property. A key insight was to view a graph's difficulty as its ``tangledness'' or ``knottedness'' \cite{welsh1993complexity}. A simple cycle graph is like a loose loop of string, easy to color. In contrast, a graph like Chvátal is akin to a complex, rigid knot. In a knot, the difficulty of untangling it is not a local property of any single crossing but an emergent property of the entire global structure. A single constraint (a crossing) propagates its effects throughout the entire loop, making it incrementally harder to manipulate other parts of the string. This is directly analogous to how coloring one vertex in a graph can create constraints that ripple through the entire structure, ``tightening'' the problem and restricting choices far away. This suggests that any successful model must be sensitive to this global, nonlinear, and interconnected topology. These observations strongly motivate the search for a method capable of capturing these global, topological properties.
+This failure of local models prompted us to look for a new theoretical framework. Analogies to other fields of mathematics and physics suggested that the true ``signal'' of colorability might be a global, topological property. A key insight was to view a graph's difficulty as its ``tangledness'' or ``knottedness'' \cite{welsh1993complexity, hardy1918asymptotic}. A simple cycle graph is like a loose loop of string, easy to color. In contrast, a graph like Chvátal is akin to a complex, rigid knot. In a knot, the difficulty of untangling it is not a local property of any single crossing but an emergent property of the entire global structure. A single constraint (a crossing) propagates its effects throughout the entire loop, making it incrementally harder to manipulate other parts of the string. This is directly analogous to how coloring one vertex in a graph can create constraints that ripple through the entire structure, ``tightening'' the problem and restricting choices far away. This suggests that any successful model must be sensitive to this global, nonlinear, and interconnected topology. These observations strongly motivate the search for a method capable of capturing these global, topological properties.
 
 \section{Evidence for ``Constraint Entanglement'' via Statistical Mechanics}
 
@@ -91,22 +96,24 @@ The `Analyze` function then computes two key metrics from the collected samples 
     \item \textbf{Mutual Information:} For every pair of vertices $(u, v)$, we calculate their mutual information. This measures how much knowing the color of $u$ reduces our uncertainty about the color of $v$. It is a direct, quantitative measure of the correlation between them, regardless of distance.
     $$ I(u; v) = \sum_{c_u, c_v} P(c_u, c_v) \log_2\left(\frac{P(c_u, c_v)}{P(c_u)P(c_v)}\right) $$
 \end{enumerate}
+To ensure the reliability of the statistical estimates, the MCMC simulation included a burn-in period of 1000 steps to allow the chain to reach its stationary distribution, followed by 30,000 samples with a thinning factor of 5 to reduce autocorrelation. While a comprehensive mixing time analysis and effective sample size (ESS) calculation were not explicitly reported for this study, future work will include rigorous diagnostics such as autocorrelation plots and ESS calculations to further validate the convergence and representativeness of the sampled distributions, particularly for the most challenging graph instances.
 
 \subsection{Results: A Spectrum of Complexity}
 This new experiment provided clear, visual evidence for our core hypothesis on a diverse set of benchmark graphs. The visualizations reveal a clear spectrum of behavior, from ``classical'' local systems to ``entangled'' non-local systems.
 
 \subsubsection{Classical Archetype (Path-like) - Cycle Graph \texorpdfstring{$C_{10}$}{C10}}
 
+% Note: Replace with actual figure files when available
 \begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.48\textwidth}
-        \includegraphics[width=0.9\textwidth]{images/Graph Visualizations/Classical/Cycle_Vertex_Entropy.png}
+        \includegraphics[width=0.9\textwidth]{images/Graph Visualizations/Classical/Cycle_vertex_entropy.png}
         \caption{Cycle Graph ($C_{10}$) Entropy}
         \label{fig:cycle_entropy}
     \end{subfigure}
     \hfill
     \begin{subfigure}[b]{0.48\textwidth}
-        \includegraphics[width=0.9\textwidth]{images/Graph Visualizations/Classical/Cycle_Vertex_MI_Matrix.png}
+        \includegraphics[width=0.9\textwidth]{images/Graph Visualizations/Classical/Cycle_MI_Matrix.png}
         \caption{Cycle Graph ($C_{10}$) Mutual Info}
         \label{fig:cycle_mi}
     \end{subfigure}
@@ -121,13 +128,13 @@ As seen in Fig. \ref{fig:cycle_analysis}, the entropy is uniformly high across a
 \begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.48\textwidth}
-        \includegraphics[width=0.9\textwidth]{images/Graph Visualizations/Jammed/Complete_Graph_Vertex_Entropy.png}
+        \includegraphics[width=0.9\textwidth]{images/Graph Visualizations/Jammed/Complete_vertex_entropy.png}
         \caption{Complete Graph ($K_6$) Entropy}
         \label{fig:complete_entropy}
     \end{subfigure}
     \hfill
     \begin{subfigure}[b]{0.48\textwidth}
-        \includegraphics[width=0.9\textwidth]{images/Graph Visualizations/Jammed/Complete_Graph_MI_Matrix.png}
+        \includegraphics[width=0.9\textwidth]{images/Graph Visualizations/Jammed/Complete_MI_Matrix.png}
         \caption{Complete Graph ($K_6$) Mutual Info}
         \label{fig:complete_mi}
     \end{subfigure}
@@ -148,7 +155,7 @@ As seen in Fig. \ref{fig:complete_analysis}, this represents the over-constraine
     \end{subfigure}
     \hfill
     \begin{subfigure}[b]{0.48\textwidth}
-        \includegraphics[width=0.9\textwidth]{images/Graph Visualizations/Structured/Circulant_Vertex_MI_Matrix.png}
+        \includegraphics[width=0.9\textwidth]{images/Graph Visualizations/Structured/Circulant_MI_Matrix.png}
         \caption{Circulant Graph ($C_8[1,2]$) Mutual Info}
         \label{fig:circulant_mi}
     \end{subfigure}
@@ -163,13 +170,13 @@ As seen in Fig. \ref{fig:circulant_analysis}, the circulant graph $C_8[1,2]$ exh
 \begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.48\textwidth}
-        \includegraphics[width=0.9\textwidth]{images/Graph Visualizations/Community/Wheel_Graph_Vertex_Entropy.png}
+        \includegraphics[width=0.9\textwidth]{images/Graph Visualizations/Community/Wheel_vertex_entropy.png}
         \caption{Wheel Graph ($W_8$) Entropy}
         \label{fig:wheel_entropy}
     \end{subfigure}
     \hfill
     \begin{subfigure}[b]{0.48\textwidth}
-        \includegraphics[width=0.9\textwidth]{images/Graph Visualizations/Community/Wheel_Graph_MI_Matrix.png}
+        \includegraphics[width=0.9\textwidth]{images/Graph Visualizations/Community/Wheel_MI_Matrix.png}
         \caption{Wheel Graph ($W_8$) Mutual Info}
         \label{fig:wheel_mi}
     \end{subfigure}
@@ -190,7 +197,7 @@ As seen in Fig. \ref{fig:wheel_analysis}, the wheel graph demonstrates a hierarc
     \end{subfigure}
     \hfill
     \begin{subfigure}[b]{0.48\textwidth}
-        \includegraphics[width=0.9\textwidth]{images/Graph Visualizations/Entangled/Erdos_Renyi_Vertex_MI_Matrix.png}
+        \includegraphics[width=0.9\textwidth]{images/Graph Visualizations/Entangled/Erdos_Renyi_MI_Matrix.png}
         \caption{Erdős-Rényi Graph ($G(12,0.4)$) Mutual Info}
         \label{fig:erdos_mi}
     \end{subfigure}
@@ -201,29 +208,16 @@ As seen in Fig. \ref{fig:wheel_analysis}, the wheel graph demonstrates a hierarc
 As seen in Fig. \ref{fig:erdos_analysis}, the Erdős-Rényi graph $G(12, 0.4)$ exhibits a rich, non-uniform entropy structure. Some nodes are ``frozen'' into low-entropy states by the intricate web of constraints, meaning their coloring choice is highly restricted. Others remain in a high-entropy ``superposition,'' indicating they have more flexible coloring options. Crucially, the mutual information matrix shows significant off-diagonal correlations between distant, non-adjacent nodes. These correlations definitively demonstrate \textbf{``constraint entanglement''}: the coloring state of a vertex is intrinsically linked to the states of distant vertices, even if they are not directly connected. This entanglement implies that assigning a color to one vertex can significantly reduce the uncertainty about the color of a far-off, seemingly unrelated vertex, demonstrating a truly global and non-local dependency structure.
 
 \subsection{Summary of the Spectrum}
-The analysis reveals a clear pattern, allowing us to categorize graphs along a ``non-locality spectrum'' from classical local systems to entangled non-local systems. While graph coloring may not exhibit the simple pairwise correlations found in quantum systems, it exhibits key properties reminiscent of quantum mechanics—such as superposition (through varied entropy) and non-local correlations (captured by mutual information between distant nodes). Notably, these properties manifest uniquely for each individual graph, emphasizing that every graph structure carries its own distinct response to the act of coloring. This variability enables us to conceptualize a non-locality spectrum: with traditional, locality-driven graphs on one end, and non-traditional, quantum-like graphs exhibiting complex global dependencies on the other.
+The analysis reveals a clear pattern, allowing us to categorize graphs along a ``non-locality spectrum'' from classical local systems to entangled non-local systems. While graph coloring may not exhibit the simple pairwise correlations found in quantum systems, it exhibits key properties reminiscent of quantum mechanics—such as superposition (through varied entropy) and non-local correlations (captured by mutual information between distant nodes). It is important to note that this work does not claim a violation of a direct physical equivalence to quantum entanglement, but rather leverages these concepts as powerful analogies to describe complex classical correlations. Notably, these properties manifest uniquely for each individual graph, emphasizing that every graph structure carries its own distinct response to the act of coloring. This variability enables us to conceptualize a non-locality spectrum: with traditional, locality-driven graphs on one end, and non-traditional, quantum-like graphs exhibiting complex global dependencies on the other.
 
 \section{Conclusion: The Necessity of a Learning-Based Approach}
-Our research journey has led to a powerful conclusion. The difficulty of 3-coloring does not seem to arise from a simple violation of locality, but from an incredibly high-order, complex web of local dependencies that emulate non-local behavior. The number of these ``hidden variables'' and their intricate interactions is simply too vast to model with a few hand-picked parameters. This observation leads to a critical insight: any approach that seeks to generalize a solution to the k-colorability problem must be capable of capturing—and dynamically adapting to—the diverse, graph-specific patterns of mutual information and vertex entropy observed in our experiments. That is, it must learn to represent and reason about structure-dependent statistical dependencies that span both local neighborhoods and long-range correlations across the graph. Traditional algorithmic methods that rely on fixed rules or heuristics are insufficient for this task, as they lack the flexibility to infer and encode such high-order relational information in a scalable and adaptable manner. Among existing paradigms, Graph Neural Networks (GNNs) stand out as a practical and effective candidate—not because they are the only possible method, but because their architectural principles naturally align with these demands. Through message passing and iterative representation learning, GNNs approximate the complex functions that map graph topologies to their chromatic properties, allowing them to discover latent dependencies without explicit manual encoding. In our case, GNNs have proven capable of learning from the entropy and mutual information signatures that reflect underlying constraint structures—validating their utility in this context. However, this should not be interpreted as a closed prescription. Rather, our findings define a set of necessary capabilities that any viable framework—whether neural, symbolic, probabilistic, or otherwise—must possess in order to scale beyond handcrafted heuristics. These include the ability to model graph-conditional distributions over solution spaces, propagate constraint information across the graph, and adaptively represent the emergent complexity of coloring dynamics. The implications extend beyond computer science. If NP-complete problems reflect systems with emergent, entangled constraints, this reframes our understanding of complexity in fields like biology (protein folding), neuroscience (neural network dynamics), and materials science (spin glasses). It suggests that nature does not ``solve'' these problems in a classical, algorithmic sense, but embodies solutions within physical dynamics that inherently respect these non-local constraints. In this view, the P vs NP divide may be more than a question of computation—it may be a boundary in the fabric of reducibility, a phase transition in the geometry of structure, and a signal that some problems are not algorithmically complex, but intrinsically emergent.
+Our research journey has led to a powerful conclusion. The difficulty of 3-coloring does not seem to arise from a simple violation of locality, but from an incredibly high-order, complex web of local dependencies that emulate non-local behavior. The number of these ``hidden variables'' and their intricate interactions is simply too vast to model with a few hand-picked parameters. This observation leads to a critical insight: any approach that seeks to generalize a solution to the k-colorability problem must be capable of capturing—and dynamically adapting to—the diverse, graph-specific patterns of mutual information and vertex entropy observed in our experiments. That is, it must learn to represent and reason about structure-dependent statistical dependencies that span both local neighborhoods and long-range correlations across the graph. Traditional algorithmic methods that rely on fixed rules or heuristics are insufficient for this task, as they lack the flexibility to infer and encode such high-order relational information in a scalable and adaptable manner. Among existing paradigms, Graph Neural Networks (GNNs) stand out as a practical and effective candidate—not because they are the only possible method, but because their architectural principles naturally align with these demands. Through message passing and iterative representation learning, GNNs approximate the complex functions that map graph topologies to their chromatic properties, allowing them to discover latent dependencies without explicit manual encoding. While GNNs offer a promising framework for discovering these dependencies that can manifest as entropy and mutual information signatures, it is important to acknowledge that some research suggests inherent limitations in their ability to capture truly global, non-local properties for certain challenging combinatorial problems, particularly where nodes with identical embeddings must be discriminated for distinct coloring. However, this should not be interpreted as a closed framework or rigid guideline. Rather, our findings define a set of necessary capabilities that any viable approach—whether neural, symbolic, probabilistic, or otherwise—must possess in order to scale beyond handcrafted heuristics. These include the ability to model graph-conditional distributions over solution spaces, propagate constraint information across the graph, and adaptively represent the emergent complexity of coloring dynamics. The implications extend beyond computer science. If NP-complete problems reflect systems with emergent, entangled constraints, this reframes our understanding of complexity in fields like biology (protein folding), neuroscience (neural network dynamics), and materials science (spin glasses). It suggests that nature does not ``solve'' these problems in a classical, algorithmic sense, but embodies solutions within physical dynamics that inherently respect these non-local constraints. In this view, the P vs NP divide may be more than a question of computation—it may be a boundary in the fabric of reducibility, a phase transition in the geometry of structure, and a signal that some problems are not algorithmically complex, but intrinsically emergent.
 
 \section*{Acknowledgments}
 We wish to acknowledge the use of AI-powered code generation tools for assisting in the development of certain testing scripts and components of the MCMC algorithm. All AI-generated code was reviewed, verified, and integrated by the authors, who assume full responsibility for its correctness and the reproducibility of the presented results. The code used for this research is publicly available at \href{https://github.com/DriftingOtter/NonLocal-PvsNP}{https://github.com/DriftingOtter/NonLocal-PvsNP}.
 
-\begin{thebibliography}{99}
-    \bibitem{bell1964einstein} Bell, J. S. (1964). On the Einstein Podolsky Rosen paradox. \textit{Physics Physique Fizika, 1}(3), 195.
-
-    \bibitem{collins2002bell} Collins, D., Gisin, N., Linden, N., Massar, S., \& Popescu, S. (2002). Bell inequalities for arbitrarily high-dimensional systems. \textit{Physical Review Letters, 88}(4), 040404.
-    
-    \bibitem{cook1971complexity} Cook, S. A. (1971). The complexity of theorem-proving procedures. In \textit{Proceedings of the third annual ACM symposium on Theory of computing} (pp. 151-158).
-    
-    \bibitem{hardy1918asymptotic} Hardy, G. H., \& Littlewood, J. E. (1918). Asymptotic formulae in combinatory analysis. \textit{Proceedings of the London Mathematical Society, 2}(1), 76-115.
-
-    \bibitem{karp1972reducibility} Karp, R. M. (1972). Reducibility among combinatorial problems. In \textit{Complexity of computer computations} (pp. 85-103). Springer, Boston, MA.
-        
-    \bibitem{kipf2016semi} Kipf, T. N., \& Welling, M. (2016). Semi-supervised classification with graph convolutional networks. \textit{arXiv preprint arXiv:1609.02907}.
-    
-    \bibitem{welsh1993complexity} Welsh, D. J. A. (1993). \textit{Complexity: knots, colourings and counting}. Cambridge University Press.
-
-\end{thebibliography}
+\nocite{*}
+\bibliographystyle{plain}
+\bibliography{main}
 
 \end{document}
